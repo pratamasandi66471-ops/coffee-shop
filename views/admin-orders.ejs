@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Pembayaran - Coffee 99</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-light">
+  <%- include('partials/header') %>
+
+  <main class="container my-5 pt-5">
+    <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h3 mb-1">Manajemen Pembayaran</h1>
+        <p class="text-muted mb-0">Konfirmasi pembayaran customer untuk order yang masih pending.</p>
+      </div>
+
+      <form method="GET" action="/orders/admin" class="d-flex gap-2 align-items-center">
+        <label for="paymentStatusFilter" class="form-label mb-0 fw-semibold">Filter:</label>
+        <select id="paymentStatusFilter" name="payment_status" class="form-select">
+          <option value="all" <%= activePaymentStatus === 'all' ? 'selected' : '' %>>Semua</option>
+          <option value="pending" <%= activePaymentStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+          <option value="paid" <%= activePaymentStatus === 'paid' ? 'selected' : '' %>>Paid</option>
+          <option value="failed" <%= activePaymentStatus === 'failed' ? 'selected' : '' %>>Failed</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Terapkan</button>
+      </form>
+    </div>
+
+    <% if (flashMessage) { %>
+      <div class="alert alert-<%= flashMessage.type %> mb-4" role="alert">
+        <%= flashMessage.text %>
+      </div>
+    <% } %>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Pembayaran</th>
+                <th>Total</th>
+                <th>Waktu</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (!orders.length) { %>
+                <tr>
+                  <td colspan="6" class="text-center py-5 text-muted">Belum ada data order pada filter ini.</td>
+                </tr>
+              <% } %>
+
+              <% orders.forEach((order) => { %>
+                <tr>
+                  <td>
+                    <div class="fw-bold">#<%= order.id %></div>
+                    <small class="text-muted">Status order: <%= order.status %></small>
+                  </td>
+                  <td>
+                    <div class="fw-semibold"><%= order.user_name || 'User tidak ditemukan' %></div>
+                    <small class="text-muted"><%= order.user_email || '-' %></small>
+                  </td>
+                  <td>
+                    <div class="fw-semibold"><%= order.payment_method || '-' %></div>
+                    <% const paymentStatus = String(order.payment_status || '').toLowerCase(); %>
+                    <span class="badge <%= paymentStatus === 'paid' ? 'bg-success' : paymentStatus === 'failed' ? 'bg-danger' : 'bg-warning text-dark' %>">
+                      <%= order.payment_status || 'pending' %>
+                    </span>
+                  </td>
+                  <td class="fw-semibold">Rp <%= Number(order.total_price || 0).toLocaleString('id-ID') %></td>
+                  <td>
+                    <small class="text-muted">
+                      <%= new Date(order.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) %>
+                    </small>
+                  </td>
+                  <td>
+                    <% if (paymentStatus === 'pending') { %>
+                      <div class="d-flex flex-wrap gap-2">
+                        <form action="/orders/admin/<%= order.id %>/confirm" method="POST" class="mb-0">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                          <input type="hidden" name="payment_status" value="<%= activePaymentStatus %>">
+                          <button type="submit" class="btn btn-success btn-sm">Konfirmasi</button>
+                        </form>
+                        <form action="/orders/admin/<%= order.id %>/reject" method="POST" class="mb-0">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                          <input type="hidden" name="payment_status" value="<%= activePaymentStatus %>">
+                          <button type="submit" class="btn btn-outline-danger btn-sm">Tolak</button>
+                        </form>
+                      </div>
+                    <% } else { %>
+                      <span class="text-muted small">Sudah diproses</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

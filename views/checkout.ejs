@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - Coffee 99</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-light">
+  <%- include('partials/header') %>
+
+  <div class="container my-5 pt-5">
+    <div class="row g-5">
+      <div class="col-lg-8">
+        <div class="card shadow-lg border-0">
+          <div class="card-header bg-success text-white">
+            <h3 class="mb-0">
+              <i class="bi bi-credit-card-2-front me-2"></i>
+              Informasi Pengiriman dan Pembayaran
+            </h3>
+          </div>
+          <div class="card-body">
+            <form action="/orders/checkout" method="POST" id="checkoutForm">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+              <div class="row mb-5">
+                <div class="col-md-6">
+                  <h5><i class="bi bi-house-door me-2 text-primary"></i>Pengiriman</h5>
+                  <div class="form-check">
+                    <input class="form-check-input js-delivery-type" type="radio" name="delivery_type" id="delivery" value="delivery" checked>
+                    <label class="form-check-label fw-semibold" for="delivery">
+                      Antar ke Alamat
+                    </label>
+                  </div>
+                  <div class="form-check mt-2">
+                    <input class="form-check-input js-delivery-type" type="radio" name="delivery_type" id="dinein" value="dinein">
+                    <label class="form-check-label fw-semibold" for="dinein">
+                      Ambil di Meja
+                    </label>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div id="deliveryFields">
+                    <label class="form-label fw-bold" for="addressInput">Alamat Lengkap</label>
+                    <textarea
+                      class="form-control"
+                      id="addressInput"
+                      name="address"
+                      rows="3"
+                      placeholder="Jl. Contoh No. 99, Jakarta"
+                      required
+                    ></textarea>
+                  </div>
+                  <div id="dineinFields" style="display: none;">
+                    <label class="form-label fw-bold" for="tableSelect">Nomor Meja</label>
+                    <select class="form-select" id="tableSelect" name="table">
+                      <option value="">Pilih Meja...</option>
+                      <option value="1">Meja 1 (2 orang)</option>
+                      <option value="2">Meja 2 (4 orang)</option>
+                      <option value="3">Meja 3 (6 orang)</option>
+                      <option value="4">Meja 4 (Outdoor)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-5">
+                <h5><i class="bi bi-cash-coin me-2 text-warning"></i>Pilih Metode Pembayaran</h5>
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <div class="card border-primary h-100">
+                      <div class="card-body text-center p-4">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="payment_method" id="cash" value="cash" checked>
+                          <label class="form-check-label w-100 h-100 d-flex flex-column align-items-center" for="cash">
+                            <i class="bi bi-cash-stack fs-1 text-success mb-2"></i>
+                            <h6>Bayar Cash</h6>
+                            <small class="text-muted">Lunas saat terima barang</small>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="card border-warning h-100">
+                      <div class="card-body text-center p-4 position-relative">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="payment_method" id="qris" value="qris">
+                          <label class="form-check-label w-100 h-100 d-flex flex-column align-items-center" for="qris">
+                            <i class="bi bi-qr-code fs-1 text-warning mb-2"></i>
+                            <h6>QRIS</h6>
+                            <small class="text-muted">Transfer digital aman</small>
+                          </label>
+                        </div>
+                        <img
+                          src="https://via.placeholder.com/120x120/6F4E37/FFFFFF?text=QRIS"
+                          class="position-absolute bottom-0 end-0 rounded me-2 mb-2"
+                          style="width: 80px;"
+                          alt="QRIS Code"
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="card border-info h-100">
+                      <div class="card-body text-center p-4">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="payment_method" id="dana" value="dana">
+                          <label class="form-check-label w-100 h-100 d-flex flex-column align-items-center" for="dana">
+                            <i class="bi bi-wallet2 fs-1 text-info mb-2"></i>
+                            <h6>DANA</h6>
+                            <small class="text-muted">Bayar cepat via e-wallet</small>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-success btn-lg w-100 py-3">
+                <i class="bi bi-check-circle me-2"></i>
+                Konfirmasi Pesanan dan Bayar Rp <%= total.toLocaleString("id-ID") %>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card shadow-lg border-0 sticky-top" style="top: 20px;">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Pesananmu</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-3">
+              <small class="text-muted">Subtotal:</small>
+              <strong>Rp <%= (subtotal || total).toLocaleString("id-ID") %></strong>
+            </div>
+            <div class="d-flex justify-content-between mb-3">
+              <small class="text-muted">Biaya Pengiriman:</small>
+              <span class="badge bg-success">GRATIS</span>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between fs-4 fw-bold text-dark">
+              <span>Total Akhir:</span>
+              <span class="text-primary">Rp <%= total.toLocaleString("id-ID") %></span>
+            </div>
+            <div class="mt-4 p-3 bg-light rounded text-center">
+              <i class="bi bi-shield-check text-success fs-4 mb-2"></i>
+              <div><strong>Pesanan Aman</strong></div>
+              <small class="text-muted">Garansi 100% uang kembali</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include('partials/footer') %>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function updateDeliveryFields(value) {
+      const deliveryFields = document.getElementById("deliveryFields");
+      const dineinFields = document.getElementById("dineinFields");
+      const addressInput = document.getElementById("addressInput");
+      const tableSelect = document.getElementById("tableSelect");
+
+      if (value === "delivery") {
+        deliveryFields.style.display = "block";
+        dineinFields.style.display = "none";
+        addressInput.required = true;
+        tableSelect.required = false;
+        tableSelect.value = "";
+      } else {
+        deliveryFields.style.display = "none";
+        dineinFields.style.display = "block";
+        addressInput.required = false;
+        addressInput.value = "";
+        tableSelect.required = true;
+      }
+    }
+
+    document.querySelectorAll(".js-delivery-type").forEach((radio) => {
+      radio.addEventListener("change", (event) => {
+        updateDeliveryFields(event.target.value);
+      });
+    });
+  </script>
+</body>
+</html>

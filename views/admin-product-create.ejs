@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Tambah Menu</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="admin-create-page">
+  <%- include('partials/header') %>
+
+  <main class="container admin-create-wrap">
+    <section class="admin-create-panel">
+      <h1 class="admin-create-title">Add New Menu</h1>
+
+      <% if (errorMessage) { %>
+        <div class="alert alert-danger"><%= errorMessage %></div>
+      <% } %>
+      <% if (successMessage) { %>
+        <div class="alert alert-success"><%= successMessage %></div>
+      <% } %>
+
+<form id="createProductForm" enctype="multipart/form-data" method="POST" action="/products/admin/new" class="admin-create-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+  <div class="admin-input-group">
+    <label class="admin-label" for="name">
+      <i class="bi bi-list-ul" aria-hidden="true"></i>
+      <span>Menu Name</span>
+    </label>
+    <input
+      id="name"
+      name="name"
+      class="form-control admin-input"
+      maxlength="120"
+      placeholder="e.g., Signature Latte"
+      required
+      value="<%= formData.name %>"
+    >
+  </div>
+
+  <div class="admin-input-group">
+    <label class="admin-label" for="description">
+      <i class="bi bi-card-text" aria-hidden="true"></i>
+      <span>Description</span>
+    </label>
+    <textarea
+      id="description"
+      name="description"
+      class="form-control admin-input admin-input-textarea"
+      rows="4"
+      maxlength="1000"
+      required
+    ><%= formData.description %></textarea>
+  </div>
+
+  <div class="admin-input-group">
+    <label class="admin-label" for="price">
+      <i class="bi bi-tag" aria-hidden="true"></i>
+      <span>Harga (Rupiah)</span>
+    </label>
+    <input
+      id="price"
+      name="price"
+      type="number"
+      min="1"
+      step="1"
+      class="form-control admin-input"
+      required
+      value="<%= formData.price %>"
+    >
+  </div>
+
+  <div class="admin-input-group">
+    <label class="admin-label" for="imagePicker">
+      <i class="bi bi-image" aria-hidden="true"></i>
+      <span>Unggah Gambar</span>
+    </label>
+
+    <div class="admin-upload-controls">
+      <input id="imagePicker" name="image" type="file" accept="image/*" class="d-none">
+      <button type="button" class="btn admin-upload-btn" id="pickImageButton">
+        <i class="bi bi-upload me-2"></i>
+        Upload Image
+      </button>
+    </div>
+
+    <div class="admin-image-preview-wrapper mt-3">
+      <div id="imagePreviewPlaceholder" class="admin-image-preview-placeholder">
+        <i class="bi bi-card-image fs-2"></i>
+        <div>No image selected</div>
+      </div>
+      <img id="imagePreview" class="admin-image-preview d-none img-fluid rounded" alt="Preview image">
+    </div>
+
+    <small class="admin-helper-text">Pastikan file gambar sudah ada di folder `public/image`.</small>
+  </div>
+
+  <div class="admin-create-actions">
+    <a href="/products" class="admin-back-link">Back to Menu</a>
+    <button type="submit" class="btn admin-save-btn" id="saveButton">
+      <i class="bi bi-check-circle me-2"></i>
+      Save Menu
+    </button>
+  </div>
+</form>
+    </section>
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const pickButton = document.getElementById('pickImageButton');
+    const imagePicker = document.getElementById('imagePicker');
+    const previewImage = document.getElementById('imagePreview');
+    const previewPlaceholder = document.getElementById('imagePreviewPlaceholder');
+    let activeObjectUrl = null;
+
+    function showPlaceholder() {
+      if (!previewImage || !previewPlaceholder) return;
+      previewImage.classList.add('d-none');
+      previewImage.removeAttribute('src');
+      previewPlaceholder.classList.remove('d-none');
+    }
+
+    function showPreview(src) {
+      if (!previewImage || !previewPlaceholder) return;
+      previewImage.src = src;
+      previewImage.classList.remove('d-none');
+      previewPlaceholder.classList.add('d-none');
+    }
+
+    function clearObjectUrl() {
+      if (activeObjectUrl) {
+        URL.revokeObjectURL(activeObjectUrl);
+        activeObjectUrl = null;
+      }
+    }
+
+    if (previewImage && previewImage.classList.contains('d-none')) {
+      showPlaceholder();
+    }
+
+    pickButton?.addEventListener('click', () => imagePicker?.click());
+
+    imagePicker?.addEventListener('change', (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      clearObjectUrl();
+      activeObjectUrl = URL.createObjectURL(file);
+      showPreview(activeObjectUrl);
+    });
+
+    window.addEventListener('beforeunload', clearObjectUrl);
+
+    const form = document.getElementById('createProductForm');
+    const saveButton = document.getElementById('saveButton');
+    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      saveButton.disabled = true;
+      saveButton.innerHTML = '<i class="bi bi-hourglass-split me-2 spinner-border spinner-border-sm"></i>Saving...';
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch('/products/admin/new', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-Token': csrfToken
+          },
+          body: formData
+        });
+
+        if (response.redirected) {
+          window.location.href = response.url;
+          return;
+        }
+
+        const data = await response.json();
+        showAlert(data.message || 'Unknown error', 'danger');
+      } catch (error) {
+        showAlert('Network error. Please try again.', 'danger');
+      } finally {
+        saveButton.disabled = false;
+        saveButton.innerHTML = '<i class="bi bi-check-circle me-2"></i>Save Menu';
+      }
+    });
+
+    function showAlert(message, type = 'danger') {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.role = 'alert';
+      alertDiv.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+      form.parentNode.insertBefore(alertDiv, form);
+      setTimeout(() => alertDiv.remove(), 5000);
+    }
+  });
+  </script>
+</body>
+</html>

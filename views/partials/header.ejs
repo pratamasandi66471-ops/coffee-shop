@@ -1,0 +1,85 @@
+<%
+  const currentPath = typeof requestPath === "string" ? requestPath : "";
+%>
+
+<nav class="navbar navbar-expand-xl fixed-top" id="mainNavbar">
+  <div class="container nav-shell">
+    <a class="nav-brand" href="/">
+      <span class="nav-brand-mark">
+        <i class="bi bi-cup-hot-fill"></i>
+      </span>
+      <span class="nav-brand-text">
+        <span class="nav-brand-title">Coffee 99</span>
+        <span class="nav-brand-subtitle">Roastery</span>
+      </span>
+    </a>
+
+    <button class="navbar-toggler nav-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Buka navigasi">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav nav-main-links mx-auto">
+        <li class="nav-item">
+          <a class="nav-link <%= currentPath === '/' ? 'active' : '' %>" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= currentPath.startsWith('/products') ? 'active' : '' %>" href="/products">Menu</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= currentPath === '/' ? 'active' : '' %>" href="/#locations">Locations</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= currentPath === '/' ? 'active' : '' %>" href="/#about">About</a>
+        </li>
+        <% if (role === "admin") { %>
+          <li class="nav-item">
+            <a class="nav-link nav-link-admin <%= currentPath === '/products/admin/new' ? 'active' : '' %>" href="/products/admin/new">Admin Menu</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-admin <%= currentPath === '/orders/admin' ? 'active' : '' %>" href="/orders/admin">Admin Payments</a>
+          </li>
+        <% } %>
+      </ul>
+
+      <div class="nav-quick-actions">
+        <a class="nav-action-link" href="/#locations">
+          <i class="bi bi-geo-alt"></i>
+          <span>Locations</span>
+        </a>
+        <a class="nav-action-link" href="<%= user ? '/orders/cart' : '/login' %>">
+          <i class="bi bi-cart3"></i>
+          <span>Cart</span>
+        </a>
+        <% if (user) { %>
+          <form action="/logout" method="POST" class="nav-action-form">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button type="submit" class="nav-action-link nav-action-button" aria-label="Logout">
+              <i class="bi bi-person-circle"></i>
+              <span>Logout</span>
+            </button>
+          </form>
+        <% } else { %>
+          <a class="nav-action-link" href="/login">
+            <i class="bi bi-person-circle"></i>
+            <span>User/Login</span>
+          </a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+  (() => {
+    const navbar = document.getElementById("mainNavbar");
+    if (!navbar) return;
+
+    function syncNavbarState() {
+      navbar.classList.toggle("scrolled", window.scrollY > 10);
+    }
+
+    syncNavbarState();
+    window.addEventListener("scroll", syncNavbarState, { passive: true });
+  })();
+</script>

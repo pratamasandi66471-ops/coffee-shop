@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesanan Berhasil - Coffee 99</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-light">
+  <%- include('partials/header') %>
+
+  <div class="container my-5 pt-5 text-center fade-in-up">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card shadow-lg border-0">
+          <div class="card-body p-5">
+            <% const paymentStatus = String(payment_status || (payment_method === 'Cash' ? 'paid' : 'pending')).toLowerCase(); %>
+            <div class="mb-5">
+              <div class="icon-success bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-4" style="width: 120px; height: 120px;">
+                <i class="bi bi-check2-circle fs-1"></i>
+              </div>
+              <h1 class="display-3 fw-bold text-success mb-3">Pesanan Berhasil</h1>
+              <p class="lead text-muted mb-5">Terima kasih sudah memesan di Coffee 99. Pesananmu sedang diproses.</p>
+            </div>
+
+            <div class="row g-4 mb-5">
+              <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                  <div class="card-body text-center">
+                    <i class="bi bi-receipt fs-1 text-primary mb-3"></i>
+                    <h5 class="card-title">No. Pesanan</h5>
+                    <div class="display-6 fw-bold text-primary mb-2">#<%= orderId %></div>
+                    <small class="text-muted">Simpan nomor ini untuk tracking</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                  <div class="card-body text-center">
+                    <i class="bi bi-cash-coin fs-1 text-success mb-3"></i>
+                    <h5 class="card-title">Total Bayar</h5>
+                    <div class="display-6 fw-bold text-success mb-2">Rp <%= total_price.toLocaleString("id-ID") %></div>
+                    <div class="badge bg-success mb-2"><%= (payment_method || "cash").toUpperCase() %></div>
+                    <div class="badge <%= paymentStatus === 'paid' ? 'bg-success' : paymentStatus === 'failed' ? 'bg-danger' : 'bg-warning text-dark' %> mb-2">
+                      <%= paymentStatus.toUpperCase() %>
+                    </div>
+                    <small class="text-muted">Metode pembayaran</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                  <div class="card-body text-center">
+                    <i class="bi bi-clock-history fs-1 text-warning mb-3"></i>
+                    <h5 class="card-title">Estimasi</h5>
+                    <div class="fs-4 fw-bold text-warning mb-2">30-45 menit</div>
+                    <small class="text-muted">Pesanan sedang dipersiapkan</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="alert alert-success-custom p-4 rounded-4 shadow-sm">
+              <h5 class="mb-3">
+                <i class="bi bi-info-circle me-2"></i>
+                Informasi Penting
+              </h5>
+              <ul class="mb-0 text-start">
+                <li>Pantau status pesanan di akun kamu.</li>
+                <li>Bayar sesuai metode yang dipilih (<%= (payment_method || 'Cash').toUpperCase() %>).</li>
+                <% if (paymentStatus === "pending") { %>
+                  <li>Pembayaran sedang menunggu konfirmasi admin.</li>
+                <% } %>
+                <li>Hubungi kami jika pesanan lebih dari 60 menit: (021) 99-9999.</li>
+              </ul>
+            </div>
+
+            <div class="d-grid gap-3 d-md-flex justify-content-md-between mt-5">
+              <a href="/" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="bi bi-house-door me-2"></i>
+                Kembali Home
+              </a>
+              <a href="/products" class="btn btn-primary btn-lg px-4">
+                <i class="bi bi-shop me-2"></i>
+                Pesan Lagi
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include('partials/footer') %>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const navbar = document.getElementById("mainNavbar");
+      if (!navbar) return;
+      window.addEventListener("scroll", () => {
+        navbar.classList.toggle("scrolled", window.scrollY > 100);
+      });
+    });
+  </script>
+</body>
+</html>
