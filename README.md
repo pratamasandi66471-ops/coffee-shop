@@ -71,9 +71,11 @@ Buat file `.env` di root project:
 ```
 DB_HOST=localhost
 DB_USER=root
-DB_PASSWORD=yourpassword
+DB_PASSWORD=
 DB_NAME=coffee_shop
 PORT=3000
+NODE_ENV=development
+SESSION_SECRET=your_secret_key
 ```
 
 ---
